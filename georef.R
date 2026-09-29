@@ -96,24 +96,24 @@ extract_clean_addresses <- function(text, dep) {
 }
 
 other_cols <- setdiff(names(bur19), c("Adresse", "adresse_complete"))
-result24 <- bur19 %>%
+result <- bur19 %>%
   filter(!is.na(Adresse) & Adresse != "" & Adresse != "NA") %>%  # Filtrer les lignes vides
   mutate(clean_addresses = map2(Adresse, Dept, extract_clean_addresses)) %>%
   unnest(clean_addresses) %>%
 dplyr::  select(all_of(other_cols), numero, voie, commune, dep = Dept) %>%
   distinct()  
 
-result24 <- result24 %>%
+result <- result %>%
   mutate(
     adresse_structuree = paste(numero, voie, sep = " "),
     adresse_structuree = paste0(adresse_structuree, ", ", commune)
   ) %>%
  dplyr:: select(-numero, -voie, -commune)  # Supprime les colonnes individuelles
 
-df_geo24 <- result24 %>%
+df_geo <- result %>%
   mutate(adresse_structuree = as.character(adresse_structuree)) %>%
   geocode(address = adresse_structuree, method = 'arcgis', lat = latitude, long = longitude)
 
-df_bur19 <- df_geo24 %>%
+df_bur19 <- df_geo %>%
   filter(!is.na(latitude) & !is.na(longitude)) %>%  # enlever les adresses non géocodées
   st_as_sf(coords = c("longitude", "latitude"), crs = 4326)
