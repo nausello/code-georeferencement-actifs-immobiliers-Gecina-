@@ -1,7 +1,35 @@
-# actif tertiaires possédés en 2019 
+####### Téléchargement et extraction depuis Zenodo #######
 
-bur19 <- read.csv("D:/reru/bur19.csv", sep = ";", header = TRUE,
-                  fileEncoding = "Windows-1252")
+url_zip <- "https://zenodo.org/records/23034128/files/actifs_immobiliers_2007-2019-2024.zip?download=1"
+dest_zip <- tempfile(fileext = ".zip")
+dest_dir <- tempfile()
+
+download.file(url_zip, destfile = dest_zip, mode = "wb")
+unzip(dest_zip, exdir = dest_dir)
+
+# Vérification que les 6 fichiers sont bien présents
+list.files(dest_dir, recursive = TRUE)
+
+# Lecture des 6 bases
+
+lire_csv <- function(nom_fichier) {
+  read.csv(file.path(dest_dir, nom_fichier), sep = ";", header = TRUE,
+           fileEncoding = "Windows-1252")
+}
+
+df_bur07 <- lire_csv("bur07.csv")
+df_res07 <- lire_csv("res07.csv")
+df_bur19 <- lire_csv("bur19.csv")
+df_res19 <- lire_csv("res19.csv")
+df_bur24 <- lire_csv("bur24.csv")
+df_res24 <- lire_csv("res24.csv")
+
+# Vérification rapide
+purrr::map(list(df_bur07, df_res07, df_bur19, df_res19, df_bur24, df_res24), dim)
+
+
+
+######### Exemple pour les actifs bureaux 2019 #########
 
 extract_clean_addresses <- function(text, dep) {
   if (is.na(text) || text == "" || text == "NA") {
